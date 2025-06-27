@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "phase-1-poc",
+]
+resolver = "2"

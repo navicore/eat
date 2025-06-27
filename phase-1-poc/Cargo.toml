@@ -1,0 +1,14 @@
+[package]
+name = "phase-1-poc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aya = { version = "0.12", features = ["async_tokio"] }
+
+[build-dependencies]
+aya-builder = "0.12"
+
+[[bin]]
+name = "phase-1-poc"
+path = "src/main.rs"
