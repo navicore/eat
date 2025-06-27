@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: socket-ebpf-tracer
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: socket-ebpf-tracer
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: socket-ebpf-tracer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: socket-ebpf-tracer
+subjects:
+- kind: ServiceAccount
+  name: socket-ebpf-tracer
+  namespace: default
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: socket-ebpf-tracer
+spec:
+  selector:
+    matchLabels:
+      app: socket-ebpf-tracer
+  template:
+    metadata:
+      labels:
+        app: socket-ebpf-tracer
+    spec:
+      serviceAccountName: socket-ebpf-tracer
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: tracer
+        image: socket-audio-tracer:latest
+        imagePullPolicy: Never
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - CAP_BPF
+            - CAP_SYS_ADMIN
+            - CAP_NET_ADMIN
+            - CAP_PERFMON
+            - CAP_SYS_RESOURCE
+        volumeMounts:
+        - name: output
+          mountPath: /output
+        - name: cgroup
+          mountPath: /sys/fs/cgroup
+          mountPropagation: Bidirectional
+        - name: debugfs
+          mountPath: /sys/kernel/debug
+        - name: bpffs
+          mountPath: /sys/fs/bpf
+          mountPropagation: Bidirectional
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: output
+        hostPath:
+          path: /var/log/audio-tracer
+          type: DirectoryOrCreate
+      - name: cgroup
+        hostPath:
+          path: /sys/fs/cgroup
+          type: Directory
+      - name: debugfs
+        hostPath:
+          path: /sys/kernel/debug
+          type: DirectoryOrCreate
+      - name: bpffs
+        hostPath:
+          path: /sys/fs/bpf
+          type: DirectoryOrCreate
+      tolerations:
+      - operator: Exists

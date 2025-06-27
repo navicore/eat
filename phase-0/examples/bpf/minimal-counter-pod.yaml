@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: minimal-tcp-counter
+  namespace: audio-monitor
+spec:
+  hostNetwork: true
+  containers:
+  - name: counter
+    image: minimal-tcp-counter:test
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      privileged: true
+      capabilities:
+        add:
+        - NET_ADMIN
+        - SYS_ADMIN
+        - CAP_BPF
+  nodeSelector:
+    kubernetes.io/hostname: audio-latency-demo-worker

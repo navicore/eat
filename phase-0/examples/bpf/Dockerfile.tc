@@ -1,0 +1,58 @@
+FROM ubuntu:22.04 AS bpf-builder
+
+# Install dependencies for BPF compilation
+RUN apt-get update && apt-get install -y \
+    clang-14 \
+    llvm-14 \
+    libbpf-dev \
+    linux-headers-generic \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Copy BPF source files
+COPY tc_audio_tracer.c audio_patterns_simple.h ./
+
+# Compile BPF program
+RUN clang-14 -O2 -g -target bpf \
+    -D__TARGET_ARCH_x86 \
+    -I/usr/include/x86_64-linux-gnu \
+    -I/usr/include \
+    -c tc_audio_tracer.c -o tc_audio_tracer.o
+
+# Go builder stage
+FROM golang:1.21-alpine AS go-builder
+
+RUN apk add --no-cache gcc musl-dev linux-headers
+
+WORKDIR /build
+
+# Copy go files
+COPY go.mod go.sum* ./
+RUN go mod download
+
+COPY tc_loader.go .
+
+# Build the loader
+RUN CGO_ENABLED=0 go build -o tc_loader tc_loader.go
+
+# Final runtime stage
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    iproute2 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy compiled files
+COPY --from=bpf-builder /build/tc_audio_tracer.o ./
+COPY --from=go-builder /build/tc_loader .
+COPY pod_interface_tracer.sh .
+RUN chmod +x tc_loader pod_interface_tracer.sh
+
+# Create output directory
+RUN mkdir -p /output
+
+ENTRYPOINT ["/app/pod_interface_tracer.sh"]
