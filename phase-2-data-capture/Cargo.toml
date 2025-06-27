@@ -1,5 +1,5 @@
 [package]
-name = "phase-1-poc"
+name = "phase-2-data-capture"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,5 +14,5 @@ bytes = "1.0"
 
 
 [[bin]]
-name = "phase-1-poc"
+name = "phase-2-data-capture"
 path = "src/main.rs"
