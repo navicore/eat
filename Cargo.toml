@@ -1,6 +1,0 @@
-[workspace]
-members = [
-    "phase-1-poc",
-    "phase-2-data-capture",
-]
-resolver = "2"
