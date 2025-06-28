@@ -1,0 +1,18 @@
+[package]
+name = "phase-2-data-capture"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aya = { version = "0.13", features = ["async_tokio"] }
+aya-log = "0.2"
+env_logger = "0.10"
+log = "0.4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+anyhow = "1.0"
+bytes = "1.0"
+
+
+[[bin]]
+name = "phase-2-data-capture"
+path = "src/main.rs"
