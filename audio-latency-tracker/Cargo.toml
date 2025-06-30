@@ -16,3 +16,5 @@ tokio = { version = "1.35", features = ["macros", "rt-multi-thread", "net", "sig
 bytes = "1"
 anyhow = "1"
 clap = { version = "4.4", features = ["derive"] }
+prometheus = "0.13"
+axum = "0.7"

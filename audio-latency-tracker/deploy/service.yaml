@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: audio-latency-metrics
+  namespace: audio-latency-tracker
+  labels:
+    app: audio-latency-tracker
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: audio-latency-tracker

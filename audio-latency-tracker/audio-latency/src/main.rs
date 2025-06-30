@@ -8,6 +8,10 @@ use aya::{
 use aya_log::EbpfLogger;
 use bytes::BytesMut;
 use clap::Parser;
+mod config;
+mod signature;
+mod metrics;
+mod container;
 use log::{debug, info, warn};
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
